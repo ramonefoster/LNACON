@@ -14,7 +14,7 @@ class Server():
 
         #variables
         self.status = {}
-        self.n_connected = "[ACTIVE CONNECTIONS]\t 0"
+        self.n_connected = "[Conexões ativas]\t 0"
         self.list_addr = []
         self.stop_bit = False
         self.packages = ''
@@ -26,6 +26,7 @@ class Server():
 
         self.thread_server = threading.Thread(target=self.start_server, args=[])
         self.thread_server.start()
+        self.thread_server.should_abort_immediately = True
         self.sys_msg = ''
     
     def get_status(self):
@@ -59,7 +60,7 @@ class Server():
                     conn.send("Ecoando com recebimento".encode(self.FORMAT))
                 else:
                     conn.send("Ecoando sem recebimento".encode(self.FORMAT))
-            except ConnectionResetError:                
+            except ConnectionResetError:
                 self.connected = False
                 self.list_addr.remove(addr)
                 horario = datetime.datetime.now().strftime("%H:%M:%S")
@@ -69,18 +70,20 @@ class Server():
     def start_server(self):
         self.sys_msg = f'[SERVER ON] {self.SERVER[0]}'
         thread_client = None
-        while not self.stop_bit:            
-            conn, addr = self.server.accept() 
-            self.sys_msg = ''                                    
+        while not self.stop_bit:
+            conn, addr = self.server.accept()
+            self.sys_msg = ''
             thread_client = threading.Thread(target=self.handle_client, args=(conn, addr))
-            thread_client.start()            
+            thread_client.start()
         if thread_client:
             thread_client.join()
         
     def stop_server(self):
-        self.connected = False 
-        self.stop_bit = True  
-        self.thread_server.join()
+        self.connected = False
+        self.stop_bit = True
+        for threads in threading.enumerate():
+            threads.should_abort_immediately = True
+            threads.join()
              
            
         

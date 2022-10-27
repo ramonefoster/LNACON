@@ -97,7 +97,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def close_server(self):
         self.timer.stop()
         try:
-            self.server.stop_server()        
+            self.server.stop_server()  
             self.label_status.setStyleSheet("background-color: indianred")
         except Exception as e:
             print(str(e))
@@ -105,7 +105,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def closeEvent(self, event):
         """Close application"""
         self.close_server()
-        event.accept()        
+        event.accept()     
     
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
