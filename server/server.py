@@ -49,14 +49,15 @@ class Server():
             try:
                 msg_length = conn.recv(self.HEADER).decode(self.FORMAT)            
                 if msg_length:
-                    msg_length = int(msg_length)
-                    msg = conn.recv(msg_length).decode(self.FORMAT)
+                    # msg_length = int(msg_length)
+                    msg = conn.recv(1024).decode(self.FORMAT)
                     if msg == self.DISCONNECT_MESSAGE or msg=='':
                         self.connected = False
                         self.list_addr.remove(addr)
                         horario = datetime.datetime.now().strftime("%H:%M:%S")
                         self.sys_msg = f'Conexão {addr[0]} encerrada {horario}'
                     self.packages = f"{addr[0]}\t{msg}"
+                    print("[MSG]: ", self.packages)
                     conn.send("Ecoando com recebimento".encode(self.FORMAT))
                 else:
                     conn.send("Ecoando sem recebimento".encode(self.FORMAT))
@@ -71,19 +72,20 @@ class Server():
         self.sys_msg = f'[SERVER ON] {self.SERVER[0]}'
         thread_client = None
         while not self.stop_bit:
-            conn, addr = self.server.accept()
-            self.sys_msg = ''
-            thread_client = threading.Thread(target=self.handle_client, args=(conn, addr))
-            thread_client.start()
-        if thread_client:
-            thread_client.join()
+            if not self.stop_bit:
+                conn, addr = self.server.accept()
+                self.sys_msg = ''
+                thread_client = threading.Thread(target=self.handle_client, args=(conn, addr))
+                thread_client.start()
+            else:                
+                if thread_client:
+                    conn.close()
+                    thread_client.join()                    
         
-    def stop_server(self):
+    def stop_server(self):        
         self.connected = False
         self.stop_bit = True
-        for threads in threading.enumerate():
-            threads.should_abort_immediately = True
-            threads.join()
+        self.server.close()
              
            
         

@@ -85,7 +85,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if sys_msg:
             self.txt_server.append(sys_msg)          
         try:
-            print (status["addrs"])
+            # print (status["addrs"])
             self.txt_n_conn.setText(str(status["n_conn"]))
             for addr in status["addrs"]:
                 self.txt_list_addr.setText(addr[0])
@@ -97,10 +97,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def close_server(self):
         self.timer.stop()
         try:
-            self.server.stop_server()  
-            self.label_status.setStyleSheet("background-color: indianred")
+            if self.server:
+                self.server.stop_server()  
+                self.label_status.setStyleSheet("background-color: indianred")
         except Exception as e:
-            print(str(e))
+            self.txt_server.append(str(e))
+        finally:
+            self.server = None
 
     def closeEvent(self, event):
         """Close application"""
